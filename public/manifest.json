@@ -1,0 +1,19 @@
+{
+  "name": "AFI — Finance RPG",
+  "short_name": "AFI",
+  "description": "Retro RPG personal finance tracker — track income, expenses, and goals.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0A091C",
+  "theme_color": "#0A091C",
+  "categories": ["finance", "productivity"],
+  "icons": [
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
