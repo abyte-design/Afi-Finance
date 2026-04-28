@@ -37,8 +37,8 @@ export function Layout() {
       style={{ background: '#06050F' }}
     >
       <div
-        className="w-full relative flex flex-col"
-        style={{ maxWidth: '430px', minHeight: '100vh', background: '#0A091C' }}
+        className="w-full max-w-md relative flex flex-col sm:max-w-full"
+        style={{ minHeight: '100vh', background: '#0A091C' }}
       >
         <main className="flex-1 overflow-y-auto pb-20">
           <Outlet />

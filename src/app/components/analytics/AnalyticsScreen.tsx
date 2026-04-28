@@ -9,6 +9,7 @@ import { api } from '../../lib/api';
 import { Transaction } from '../../lib/types';
 import { formatCurrency, formatCurrencyCompact, getLast12Months, CHART_COLORS, CATEGORY_COLORS, computeMonthlyStats } from '../../lib/utils';
 import { useCurrency } from '../../context/CurrencyContext';
+import { BottomSheet } from '../shared/BottomSheet';
 
 const CustomBarTooltip = ({ active, payload, label, currency }: any) => {
   if (!active || !payload?.length) return null;
@@ -313,10 +314,8 @@ function ShareModal({ imageDataUrl, onClose, userName }: ShareModalProps) {
   };
 
   const handleInstagramStories = () => {
-    // Download first, then open Instagram
     handleDownload();
     setTimeout(() => {
-      // Try Instagram deep link (works on mobile)
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       if (isMobile) {
         window.location.href = 'instagram://camera';
@@ -327,116 +326,83 @@ function ShareModal({ imageDataUrl, onClose, userName }: ShareModalProps) {
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center"
-      style={{ background: 'rgba(6,5,15,0.92)' }}
-      onClick={onClose}
-    >
-      <div
-        className="w-full rounded-t-2xl flex flex-col"
-        style={{
-          maxWidth: '430px',
-          background: '#13112E',
-          border: '1px solid #2D2A6E',
-          borderBottom: 'none',
-          maxHeight: '90vh',
-          overflow: 'hidden',
-        }}
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Handle */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div style={{ width: '40px', height: '4px', background: '#2D2A6E', borderRadius: '2px' }} />
-        </div>
-
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid #2D2A6E' }}>
-          <div>
-            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '10px', color: '#E2E0FF' }}>
-              SHARE STATS
+    <BottomSheet
+      isOpen={true}
+      title="SHARE STATS"
+      onClose={onClose}
+      footer={
+        <div className="flex flex-col gap-3">
+          {/* Instagram Stories */}
+          <button
+            onClick={handleInstagramStories}
+            className="w-full py-4 rounded-sm flex items-center justify-center gap-3 transition-all active:scale-95"
+            style={{
+              background: 'linear-gradient(135deg, #833AB4, #E1306C, #F77737)',
+              border: 'none',
+              boxShadow: '0 0 20px rgba(225,48,108,0.4)',
+            }}
+          >
+            <Instagram size={20} color="#fff" />
+            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '10px', color: '#fff' }}>
+              INSTAGRAM STORIES
             </span>
-            <p style={{ color: '#4A4870', fontSize: '11px', fontFamily: 'system-ui', marginTop: '4px' }}>
-              Flex your finances 💜
-            </p>
-          </div>
-          <button onClick={onClose} className="p-2 rounded-sm" style={{ background: '#0E0C2A', border: '1px solid #2D2A6E' }}>
-            <X size={18} color="#7A78A0" />
+          </button>
+
+          {/* Native Share */}
+          <button
+            onClick={handleNativeShare}
+            disabled={sharing}
+            className="w-full py-4 rounded-sm flex items-center justify-center gap-3 transition-all active:scale-95"
+            style={{
+              background: sharing ? '#1E1B4B' : 'linear-gradient(135deg, #7C3AED, #5B21B6)',
+              border: '1px solid rgba(139,92,246,0.5)',
+              boxShadow: '0 0 15px rgba(124,58,237,0.3)',
+            }}
+          >
+            <Share2 size={20} color="#fff" />
+            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '10px', color: '#fff' }}>
+              {sharing ? 'SHARING...' : 'SHARE IMAGE'}
+            </span>
+          </button>
+
+          {/* Download */}
+          <button
+            onClick={handleDownload}
+            className="w-full py-4 rounded-sm flex items-center justify-center gap-3 transition-all active:scale-95"
+            style={{
+              background: 'rgba(0,255,209,0.08)',
+              border: '1px solid rgba(0,255,209,0.3)',
+            }}
+          >
+            <Download size={20} color="#00FFD1" />
+            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '10px', color: '#00FFD1' }}>
+              DOWNLOAD PNG
+            </span>
           </button>
         </div>
-
+      }
+    >
+      <div className="flex flex-col gap-4">
         {/* Preview */}
-        <div className="px-5 py-4 overflow-y-auto flex-1">
-          <div
-            className="rounded-sm overflow-hidden mb-4"
-            style={{ border: '1px solid #2D2A6E', boxShadow: '0 0 20px rgba(124,58,237,0.2)' }}
-          >
-            <img src={imageDataUrl} alt="Share preview" style={{ width: '100%', display: 'block' }} />
-          </div>
+        <div
+          className="rounded-sm overflow-hidden"
+          style={{ border: '1px solid #2D2A6E', boxShadow: '0 0 20px rgba(124,58,237,0.2)' }}
+        >
+          <img src={imageDataUrl} alt="Share preview" style={{ width: '100%', display: 'block' }} />
+        </div>
 
-          {/* Caption hint */}
-          <div
-            className="p-3 rounded-sm mb-4"
-            style={{ background: '#0E0C2A', border: '1px solid #2D2A6E' }}
-          >
-            <p style={{ color: '#4A4870', fontSize: '10px', fontFamily: 'system-ui', marginBottom: '4px' }}>Suggested caption:</p>
-            <p style={{ color: '#7A78A0', fontSize: '12px', fontFamily: 'system-ui', lineHeight: 1.5 }}>
-              Just checked my finances on AFI 🎮💜 Staying on top of my money game! #AFI #PersonalFinance #FinanceGoals #MoneyMindset
-            </p>
-          </div>
-
-          {/* Share buttons */}
-          <div className="flex flex-col gap-3 pb-6">
-            {/* Instagram Stories */}
-            <button
-              onClick={handleInstagramStories}
-              className="w-full py-4 rounded-sm flex items-center justify-center gap-3 transition-all active:scale-95"
-              style={{
-                background: 'linear-gradient(135deg, #833AB4, #E1306C, #F77737)',
-                border: 'none',
-                boxShadow: '0 0 20px rgba(225,48,108,0.4)',
-              }}
-            >
-              <Instagram size={20} color="#fff" />
-              <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '10px', color: '#fff' }}>
-                INSTAGRAM STORIES
-              </span>
-            </button>
-
-            {/* Native Share */}
-            <button
-              onClick={handleNativeShare}
-              disabled={sharing}
-              className="w-full py-4 rounded-sm flex items-center justify-center gap-3 transition-all active:scale-95"
-              style={{
-                background: sharing ? '#1E1B4B' : 'linear-gradient(135deg, #7C3AED, #5B21B6)',
-                border: '1px solid rgba(139,92,246,0.5)',
-                boxShadow: '0 0 15px rgba(124,58,237,0.3)',
-              }}
-            >
-              <Share2 size={20} color="#fff" />
-              <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '10px', color: '#fff' }}>
-                {sharing ? 'SHARING...' : 'SHARE IMAGE'}
-              </span>
-            </button>
-
-            {/* Download */}
-            <button
-              onClick={handleDownload}
-              className="w-full py-4 rounded-sm flex items-center justify-center gap-3 transition-all active:scale-95"
-              style={{
-                background: 'rgba(0,255,209,0.08)',
-                border: '1px solid rgba(0,255,209,0.3)',
-              }}
-            >
-              <Download size={20} color="#00FFD1" />
-              <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '10px', color: '#00FFD1' }}>
-                DOWNLOAD PNG
-              </span>
-            </button>
-          </div>
+        {/* Caption hint */}
+        <div
+          className="p-3 rounded-sm"
+          style={{ background: '#0E0C2A', border: '1px solid #2D2A6E' }}
+        >
+          <p style={{ color: '#4A4870', fontSize: '10px', fontFamily: 'system-ui', marginBottom: '4px' }}>Suggested caption:</p>
+          <p style={{ color: '#7A78A0', fontSize: '12px', fontFamily: 'system-ui', lineHeight: 1.5 }}>
+            Just checked my finances on AFI 🎮💜 Staying on top of my money game! #AFI #PersonalFinance #FinanceGoals #MoneyMindset
+          </p>
         </div>
       </div>
-    </div>
+    </BottomSheet>
   );
 }
 

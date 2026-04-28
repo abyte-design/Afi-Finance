@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { Search, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCurrency } from '../../context/CurrencyContext';
 import { api } from '../../lib/api';
@@ -14,6 +14,7 @@ import {
 } from '../../lib/utils';
 import { TransactionRow } from '../shared/TransactionRow';
 import { ConfirmDialog } from '../shared/ConfirmDialog';
+import { BottomSheet } from '../shared/BottomSheet';
 
 const ALL_CATEGORIES = [
   ...new Set([
@@ -34,7 +35,6 @@ interface EditModalProps {
 function EditModal({ transaction, onSave, onClose, currency }: EditModalProps) {
   const [title, setTitle] = useState(transaction.title);
   const [amount, setAmount] = useState(() => {
-    // Display formatted version for integer currencies
     const cfg = getCurrencyConfig(currency);
     if (cfg.isInteger) {
       return sanitizeAmountInput(String(Math.round(transaction.amount)), currency);
@@ -64,7 +64,6 @@ function EditModal({ transaction, onSave, onClose, currency }: EditModalProps) {
   };
 
   const handleSave = () => {
-    // Strip thousand-separator dots for integer currencies before parsing
     const rawAmount = currencyConfig.isInteger
       ? parseInt(amount.replace(/\./g, ''), 10)
       : parseFloat(amount.replace(',', '.'));
@@ -80,36 +79,29 @@ function EditModal({ transaction, onSave, onClose, currency }: EditModalProps) {
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center"
-      style={{ background: 'rgba(6,5,15,0.85)' }}
+    <BottomSheet
+      isOpen={true}
+      title="EDIT TRANSACTION"
+      onClose={onClose}
+      footer={
+        <button
+          onClick={handleSave}
+          className="w-full py-3 rounded-sm"
+          style={{
+            background: 'linear-gradient(135deg, #7C3AED, #5B21B6)',
+            border: '1px solid rgba(139,92,246,0.5)',
+            color: '#fff',
+            fontFamily: "'Press Start 2P', monospace",
+            fontSize: '10px',
+            boxShadow: '0 0 15px rgba(124,58,237,0.3)',
+            cursor: 'pointer',
+          }}
+        >
+          SAVE CHANGES
+        </button>
+      }
     >
-      <div
-        className="w-full rounded-t-lg p-5 flex flex-col gap-4"
-        style={{
-          maxWidth: '430px',
-          background: '#13112E',
-          border: '1px solid #2D2A6E',
-          borderBottom: 'none',
-          maxHeight: '80vh',
-          overflowY: 'auto',
-        }}
-      >
-        <div className="flex justify-between items-center">
-          <span
-            style={{
-              fontFamily: "'Press Start 2P', monospace",
-              fontSize: '10px',
-              color: '#E2E0FF',
-            }}
-          >
-            EDIT TRANSACTION
-          </span>
-          <button onClick={onClose}>
-            <X size={20} color="#7A78A0" />
-          </button>
-        </div>
-
+      <div className="flex flex-col gap-4">
         {/* Title */}
         <div>
           <label
@@ -229,24 +221,8 @@ function EditModal({ transaction, onSave, onClose, currency }: EditModalProps) {
             rows={2}
           />
         </div>
-
-        <button
-          onClick={handleSave}
-          className="py-3 rounded-sm"
-          style={{
-            background: 'linear-gradient(135deg, #7C3AED, #5B21B6)',
-            border: '1px solid rgba(139,92,246,0.5)',
-            color: '#fff',
-            fontFamily: "'Press Start 2P', monospace",
-            fontSize: '10px',
-            boxShadow: '0 0 15px rgba(124,58,237,0.3)',
-            cursor: 'pointer',
-          }}
-        >
-          SAVE CHANGES
-        </button>
       </div>
-    </div>
+    </BottomSheet>
   );
 }
 

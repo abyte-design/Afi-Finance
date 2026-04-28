@@ -13,6 +13,7 @@ import { Logo } from '../shared/Logo';
 import { useCurrency } from '../../context/CurrencyContext';
 import { InstallAppButton } from '../shared/InstallAppButton';
 import { ConfirmDialog } from '../shared/ConfirmDialog';
+import { BottomSheet } from '../shared/BottomSheet';
 
 const CURRENCIES: { code: string; name: string; flag: string }[] = [
   { code: 'IDR', name: 'Indonesian Rupiah', flag: '🇮🇩' },
@@ -540,148 +541,109 @@ export function ProfileScreen() {
       )}
 
       {/* Currency Picker Modal — scrollable bottom sheet */}
-      {showCurrencyPicker && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center"
-          style={{ background: 'rgba(6,5,15,0.88)' }}
-          onClick={() => setShowCurrencyPicker(false)}
-        >
+      <BottomSheet
+        isOpen={showCurrencyPicker}
+        title="SELECT CURRENCY"
+        onClose={() => setShowCurrencyPicker(false)}
+      >
+        {/* Search */}
+        <div className="mb-4">
           <div
-            className="w-full flex flex-col"
-            style={{
-              maxWidth: '430px',
-              background: '#13112E',
-              border: '1px solid #2D2A6E',
-              borderBottom: 'none',
-              borderTopLeftRadius: '16px',
-              borderTopRightRadius: '16px',
-              maxHeight: '78vh',
-            }}
-            onClick={e => e.stopPropagation()}
+            className="flex items-center gap-2 px-3 py-2.5 rounded-sm"
+            style={{ background: '#0E0C2A', border: '1px solid #2D2A6E' }}
           >
-            {/* Drag handle */}
-            <div className="flex justify-center pt-3 pb-1">
-              <div style={{ width: '36px', height: '4px', background: '#2D2A6E', borderRadius: '2px' }} />
-            </div>
-
-            {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid #1E1B4B' }}>
-              <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '10px', color: '#E2E0FF' }}>
-                SELECT CURRENCY
-              </span>
-              <button
-                onClick={() => setShowCurrencyPicker(false)}
-                className="p-1.5 rounded-sm"
-                style={{ background: '#1E1B4B', border: '1px solid #2D2A6E' }}
-              >
-                <X size={14} color="#7A78A0" />
+            <Globe size={14} color="#4A4870" />
+            <input
+              type="text"
+              placeholder="Search currency..."
+              value={currencySearch}
+              onChange={e => setCurrencySearch(e.target.value)}
+              className="flex-1 bg-transparent outline-none"
+              style={{ color: '#E2E0FF', fontSize: '13px', fontFamily: 'system-ui' }}
+              autoFocus
+            />
+            {currencySearch && (
+              <button onClick={() => setCurrencySearch('')}>
+                <X size={12} color="#4A4870" />
               </button>
-            </div>
-
-            {/* Search */}
-            <div className="px-4 py-3" style={{ borderBottom: '1px solid #1E1B4B' }}>
-              <div
-                className="flex items-center gap-2 px-3 py-2.5 rounded-sm"
-                style={{ background: '#0E0C2A', border: '1px solid #2D2A6E' }}
-              >
-                <Globe size={14} color="#4A4870" />
-                <input
-                  type="text"
-                  placeholder="Search currency..."
-                  value={currencySearch}
-                  onChange={e => setCurrencySearch(e.target.value)}
-                  className="flex-1 bg-transparent outline-none"
-                  style={{ color: '#E2E0FF', fontSize: '13px', fontFamily: 'system-ui' }}
-                  autoFocus
-                />
-                {currencySearch && (
-                  <button onClick={() => setCurrencySearch('')}>
-                    <X size={12} color="#4A4870" />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Scrollable list */}
-            <div className="overflow-y-auto flex-1" style={{ overscrollBehavior: 'contain' }}>
-              {filteredCurrencies.length === 0 ? (
-                <div className="flex flex-col items-center py-10">
-                  <p style={{ color: '#4A4870', fontSize: '12px', fontFamily: 'system-ui' }}>No currencies found</p>
-                </div>
-              ) : (
-                filteredCurrencies.map(c => {
-                  const active = currencyLabel === c.code;
-                  const symbol = ALL_CURRENCY_SYMBOLS[c.code] || c.code;
-                  return (
-                    <button
-                      key={c.code}
-                      onClick={() => { updateProfile({ currency: c.code }); setShowCurrencyPicker(false); }}
-                      className="w-full flex items-center gap-4 px-5 py-4 transition-all active:opacity-70"
-                      style={{
-                        borderBottom: '1px solid #1A1838',
-                        background: active ? 'rgba(124,58,237,0.12)' : 'transparent',
-                        borderLeft: active ? '3px solid #7C3AED' : '3px solid transparent',
-                      }}
-                    >
-                      {/* Flag */}
-                      <span style={{ fontSize: '24px', lineHeight: 1, flexShrink: 0 }}>{c.flag}</span>
-
-                      {/* Name + Code */}
-                      <div className="flex-1 text-left">
-                        <p style={{
-                          color: active ? '#E2E0FF' : '#C4C2E0',
-                          fontSize: '13px',
-                          fontFamily: 'system-ui',
-                          fontWeight: active ? 600 : 400,
-                        }}>
-                          {c.name}
-                        </p>
-                        <p style={{
-                          fontFamily: "'Press Start 2P', monospace",
-                          fontSize: '8px',
-                          color: active ? '#8B5CF6' : '#4A4870',
-                          marginTop: '2px',
-                        }}>
-                          {c.code}
-                        </p>
-                      </div>
-
-                      {/* Symbol */}
-                      <span style={{
-                        color: active ? '#8B5CF6' : '#4A4870',
-                        fontSize: '14px',
-                        fontFamily: 'system-ui',
-                        fontWeight: 600,
-                        minWidth: '32px',
-                        textAlign: 'right',
-                      }}>
-                        {symbol}
-                      </span>
-
-                      {/* Check */}
-                      {active && (
-                        <div
-                          className="flex items-center justify-center rounded-sm flex-shrink-0"
-                          style={{
-                            width: '22px', height: '22px',
-                            background: 'rgba(124,58,237,0.25)',
-                            border: '1px solid #7C3AED',
-                            boxShadow: '0 0 8px rgba(124,58,237,0.4)',
-                          }}
-                        >
-                          <Check size={12} color="#8B5CF6" />
-                        </div>
-                      )}
-                    </button>
-                  );
-                })
-              )}
-              {/* Safe area padding */}
-              <div style={{ height: '24px' }} />
-            </div>
+            )}
           </div>
         </div>
-      )}
+
+        {/* Scrollable list */}
+        {filteredCurrencies.length === 0 ? (
+          <div className="flex flex-col items-center py-10">
+            <p style={{ color: '#4A4870', fontSize: '12px', fontFamily: 'system-ui' }}>No currencies found</p>
+          </div>
+        ) : (
+          filteredCurrencies.map(c => {
+            const active = currencyLabel === c.code;
+            const symbol = ALL_CURRENCY_SYMBOLS[c.code] || c.code;
+            return (
+              <button
+                key={c.code}
+                onClick={() => { updateProfile({ currency: c.code }); setShowCurrencyPicker(false); }}
+                className="w-full flex items-center gap-4 px-4 py-4 transition-all active:opacity-70"
+                style={{
+                  borderBottom: '1px solid #1A1838',
+                  background: active ? 'rgba(124,58,237,0.12)' : 'transparent',
+                  borderLeft: active ? '3px solid #7C3AED' : '3px solid transparent',
+                }}
+              >
+                {/* Flag */}
+                <span style={{ fontSize: '24px', lineHeight: 1, flexShrink: 0 }}>{c.flag}</span>
+
+                {/* Name + Code */}
+                <div className="flex-1 text-left">
+                  <p style={{
+                    color: active ? '#E2E0FF' : '#C4C2E0',
+                    fontSize: '13px',
+                    fontFamily: 'system-ui',
+                    fontWeight: active ? 600 : 400,
+                  }}>
+                    {c.name}
+                  </p>
+                  <p style={{
+                    fontFamily: "'Press Start 2P', monospace",
+                    fontSize: '8px',
+                    color: active ? '#8B5CF6' : '#4A4870',
+                    marginTop: '2px',
+                  }}>
+                    {c.code}
+                  </p>
+                </div>
+
+                {/* Symbol */}
+                <span style={{
+                  color: active ? '#8B5CF6' : '#4A4870',
+                  fontSize: '14px',
+                  fontFamily: 'system-ui',
+                  fontWeight: 600,
+                  minWidth: '32px',
+                  textAlign: 'right',
+                }}>
+                  {symbol}
+                </span>
+
+                {/* Check */}
+                {active && (
+                  <div
+                    className="flex items-center justify-center rounded-sm flex-shrink-0"
+                    style={{
+                      width: '22px', height: '22px',
+                      background: 'rgba(124,58,237,0.25)',
+                      border: '1px solid #7C3AED',
+                      boxShadow: '0 0 8px rgba(124,58,237,0.4)',
+                    }}
+                  >
+                    <Check size={12} color="#8B5CF6" />
+                  </div>
+                )}
+              </button>
+            );
+          })
+        )}
+      </BottomSheet>
 
       {/* Logout Confirmation Dialog */}
       {showLogoutConfirm && (
